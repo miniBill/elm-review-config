@@ -54,6 +54,7 @@ import Review.Documentation.CodeSnippet
 import Review.Rule as Rule exposing (Rule)
 import ReviewPipelineStyles
 import ReviewPipelineStyles.Fixes
+import ReviewPipelineStyles.Predicates
 import ReviewPipelineStyles.Premade
 import Simplify
 import UseCamelCase
@@ -123,8 +124,23 @@ pipelineConfig =
                 |> ReviewPipelineStyles.andCallThem "forbidden << composition"
           , ReviewPipelineStyles.forbid ReviewPipelineStyles.rightCompositionPipelines
                 |> ReviewPipelineStyles.andCallThem "forbidden >> composition"
+          , ReviewPipelineStyles.forbid ReviewPipelineStyles.parentheticalApplicationPipelines
+                |> ReviewPipelineStyles.that
+                    (ReviewPipelineStyles.Predicates.haveMoreStepsThan 2
+                        |> ReviewPipelineStyles.Predicates.and
+                            (ReviewPipelineStyles.Predicates.doNot
+                                (ReviewPipelineStyles.Predicates.haveAParentNotSeparatedBy
+                                    [ ReviewPipelineStyles.Predicates.aLetBlock
+                                    , ReviewPipelineStyles.Predicates.aLambdaFunction
+                                    , ReviewPipelineStyles.Predicates.aFlowControlStructure
+                                    , ReviewPipelineStyles.Predicates.aDataStructure
+                                    ]
+                                )
+                            )
+                    )
+                |> ReviewPipelineStyles.andTryToFixThemBy ReviewPipelineStyles.Fixes.convertingToRightPizza
+                |> ReviewPipelineStyles.andCallThem "parenthetical application with several steps"
           ]
-        , ReviewPipelineStyles.Premade.noRepeatedParentheticalApplication
         , ReviewPipelineStyles.Premade.noPipelinesWithConfusingNonCommutativeFunctions
         , ReviewPipelineStyles.Premade.noSemanticallyInfixFunctionsInLeftPipelines
         ]
