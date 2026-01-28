@@ -15,6 +15,7 @@ import Derive
 import Docs.ReviewAtDocs
 import Docs.ReviewLinksAndSections
 import EqualsCaseable
+import HtmlToElm
 import LimitAliasedRecordSize
 import NoBooleanCase
 import NoBrokenParserFunctions
@@ -53,6 +54,7 @@ import Review.Documentation.CodeSnippet
 import Review.Rule as Rule exposing (Rule)
 import ReviewPipelineStyles
 import ReviewPipelineStyles.Fixes
+import ReviewPipelineStyles.Premade
 import Simplify
 import UseCamelCase
 import Validate.Regexes
@@ -113,11 +115,16 @@ config =
 
 pipelineConfig : List (ReviewPipelineStyles.PipelineRule ())
 pipelineConfig =
-    [ ReviewPipelineStyles.forbid ReviewPipelineStyles.leftPizzaPipelines
-        |> ReviewPipelineStyles.andTryToFixThemBy ReviewPipelineStyles.Fixes.convertingToParentheticalApplication
-        |> ReviewPipelineStyles.andCallThem "forbidden <| pipeline"
-    , ReviewPipelineStyles.forbid ReviewPipelineStyles.leftCompositionPipelines
-        |> ReviewPipelineStyles.andCallThem "forbidden << composition"
-    , ReviewPipelineStyles.forbid ReviewPipelineStyles.rightCompositionPipelines
-        |> ReviewPipelineStyles.andCallThem "forbidden >> composition"
-    ]
+    List.concat
+        [ [ ReviewPipelineStyles.forbid ReviewPipelineStyles.leftPizzaPipelines
+                |> ReviewPipelineStyles.andTryToFixThemBy ReviewPipelineStyles.Fixes.convertingToParentheticalApplication
+                |> ReviewPipelineStyles.andCallThem "forbidden <| pipeline"
+          , ReviewPipelineStyles.forbid ReviewPipelineStyles.leftCompositionPipelines
+                |> ReviewPipelineStyles.andCallThem "forbidden << composition"
+          , ReviewPipelineStyles.forbid ReviewPipelineStyles.rightCompositionPipelines
+                |> ReviewPipelineStyles.andCallThem "forbidden >> composition"
+          ]
+        , ReviewPipelineStyles.Premade.noRepeatedParentheticalApplication
+        , ReviewPipelineStyles.Premade.noPipelinesWithConfusingNonCommutativeFunctions
+        , ReviewPipelineStyles.Premade.noSemanticallyInfixFunctionsInLeftPipelines
+        ]
